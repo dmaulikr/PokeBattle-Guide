@@ -11,13 +11,17 @@ import SwiftyJSON
 
 class ViewController: UIViewController {
 
+    @IBOutlet var collectionView: UICollectionView!
+    
+    var selectedPokemon: Pokemon?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        collectionView.backgroundColor = UIColor.whiteColor()
         PokemonManager.sharedInstance
-
+        self.automaticallyAdjustsScrollViewInsets = false
         //typeCounters(PokemonManager.sharedInstance.pokemons[1])
-        counters(PokemonManager.sharedInstance.pokemons[1])
     }
     
     private func typeCounters(pokemonToCounter: Pokemon) {
@@ -40,81 +44,38 @@ class ViewController: UIViewController {
         }
     }
     
-    private func counters(pokemonToCounter: Pokemon) {
-        
-        var rankedPokemons: [RankedPokemon] = []
-        
-        for aPokemon in PokemonManager.sharedInstance.pokemons {
-            
-            for aPokemonAttackType in Set(aPokemon.attackTypes) {
-                let bonusDamageToTarget = Set(aPokemonAttackType.bonusDamageTo()).intersect(pokemonToCounter.types)
-                let reducedDamageToTarget = Set(aPokemonAttackType.reducedDamageTo()).intersect(pokemonToCounter.types)
-                
-                let defenseTypes = aPokemon.types;
-                var resistances: [Type] = []
-                for defenseType in defenseTypes {
-                    resistances += defenseType.resistantTo()
-                }
-                
-                var weaknesses: [Type] = []
-                for defenseType in defenseTypes {
-                    weaknesses += defenseType.susceptibleTo()
-                }
-                
-                let resistantToTarget = Set(resistances).intersect(pokemonToCounter.types)
-                let susceptibleToTarget = Set(weaknesses).intersect(pokemonToCounter.types)
-
-                var stabBonus = 1.0
-                let opponentStabBonus = 1.25
-                
-                if aPokemon.types.contains(aPokemonAttackType) {
-                    stabBonus = 1.25
-                }
-                
-                let multiplier = (stabBonus / opponentStabBonus) *
-                    pow(1.25, Double(bonusDamageToTarget.count)) *
-                    pow(0.80, Double(reducedDamageToTarget.count)) *
-                    pow(1.25, Double(resistantToTarget.count)) *
-                    pow(0.80, Double(susceptibleToTarget.count))
-                
-//                print("")
-//                print("subkey: \(aPokemon.name)_\(aPokemonAttack.type). Ranking \(multiplier)")
-//                print("AttackType: \(aPokemonAttack.type)")
-//                print("subpokemon.types: \(aPokemon.types)")
-//                print("StabBonus: \(stabBonus)")
-//                print("bonusDamageToTarget: \(bonusDamageToTarget)")
-//                print("reducedDamageToTarget: \(reducedDamageToTarget)")
-//                print("resistantToTarget: \(resistantToTarget)")
-//                print("susceptibleToTarget: \(susceptibleToTarget)")
-
-                rankedPokemons.append(RankedPokemon(pokemon: aPokemon, type: aPokemonAttackType, multiplier: multiplier))
-            }
-        }
-        
-        rankedPokemons.sortInPlace {
-            if $0.multiplier == $1.multiplier {
-                return $0.pokemon.maxCP > $1.pokemon.maxCP
-            }
-            return $0.multiplier > $1.multiplier
-        }
-        
-        print("\(pokemonToCounter.name) matchups:")
-        for rankedPokemon in rankedPokemons {
-            print(rankedPokemon)
-        }
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        let vc = segue.destinationViewController as! PokemonDetailsViewController
+        vc.selectedPokemon = selectedPokemon
     }
-    
-    
 
+    override func viewWillAppear(animated: Bool) {
+        navigationController?.navigationBarHidden = true
+    }
 }
 
-struct RankedPokemon: CustomStringConvertible {
-    let pokemon: Pokemon
-    let type: Type
-    let multiplier: Double
+extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return PokemonManager.sharedInstance.pokemons.count
+    }
     
-    var description: String {
-        return "\(pokemon.name) : \(type) - \(multiplier.roundTo2f)"
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        let reuseIdentifier = "cell"
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! PokemonCollectionViewCell
+        
+        // Use the outlet in our custom class to get a reference to the UILabel in the cell
+        cell.imageView.image = PokemonManager.sharedInstance.pokemons[indexPath.item].image
+        cell.backgroundColor = UIColor.whiteColor()
+        cell.layer.shouldRasterize = true
+        cell.layer.rasterizationScale = UIScreen.mainScreen().scale
+        cell.layer.masksToBounds = false
+        
+        return cell
+    }
+    
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        selectedPokemon = PokemonManager.sharedInstance.pokemons[indexPath.item]
+        performSegueWithIdentifier("details", sender: self)
     }
 }
 

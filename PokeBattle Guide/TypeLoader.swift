@@ -14,6 +14,11 @@ class TypeLoader {
     
     var typeData: [Type: JSON] = [:]
     
+    var susceptibleTo: [Type: [Type]] = [:]
+    var resistantTo: [Type: [Type]] = [:]
+    var bonusDamageTo: [Type: [Type]] = [:]
+    var reducedDamageTo: [Type: [Type]] = [:]
+    
     init() {
         if let path = NSBundle.mainBundle().pathForResource("types2", ofType: "json") {
             if let jsonData = NSData(contentsOfFile: path) {

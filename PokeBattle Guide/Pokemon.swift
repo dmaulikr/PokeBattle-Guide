@@ -9,6 +9,16 @@
 import Foundation
 import SwiftyJSON
 
+struct RankedPokemon: CustomStringConvertible {
+    let pokemon: Pokemon
+    let type: Type
+    let multiplier: Double
+    
+    var description: String {
+        return "\(pokemon.name) : \(type) - \(multiplier.roundTo2f)"
+    }
+}
+
 public class Pokemon: NSObject {
     let id : Int
     let name: String
@@ -16,6 +26,10 @@ public class Pokemon: NSObject {
     var quickAttacks: [Attack] = []
     var specialAttacks: [Attack] = []
     let maxCP: Int
+    
+    lazy var image: UIImage! = {
+       return UIImage(named: String(self.id))
+    }()
     
     var attacks: [Attack] {
         get {

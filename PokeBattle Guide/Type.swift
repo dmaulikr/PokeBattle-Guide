@@ -42,6 +42,10 @@ public enum Type: String, CustomStringConvertible {
     
     func susceptibleTo() -> [Type] {
         
+        if let cache = TypeLoader.sharedInstance.susceptibleTo[self] {
+            return cache
+        }
+        
         var counters: [Type] = []
         guard let typeJson = TypeLoader.sharedInstance.typeData[self] else {
             return counters
@@ -54,10 +58,16 @@ public enum Type: String, CustomStringConvertible {
         for stringType in succeptableTo {
             try! counters.append(Type(name: stringType.stringValue))
         }
+        
+        TypeLoader.sharedInstance.susceptibleTo[self] = counters
         return counters
     }
     
     func resistantTo() -> [Type] {
+        
+        if let cache = TypeLoader.sharedInstance.resistantTo[self] {
+            return cache
+        }
         
         var counters: [Type] = []
         guard let typeJson = TypeLoader.sharedInstance.typeData[self] else {
@@ -71,10 +81,16 @@ public enum Type: String, CustomStringConvertible {
         for stringType in resistantTo {
             try! counters.append(Type(name: stringType.stringValue))
         }
+        
+        TypeLoader.sharedInstance.resistantTo[self] = counters
         return counters
     }
     
     func bonusDamageTo() -> [Type] {
+        
+        if let cache = TypeLoader.sharedInstance.bonusDamageTo[self] {
+            return cache
+        }
         
         var counters: [Type] = []
         
@@ -84,10 +100,16 @@ public enum Type: String, CustomStringConvertible {
             }
         }
         
+        TypeLoader.sharedInstance.bonusDamageTo[self] = counters
         return counters
     }
     
     func reducedDamageTo() -> [Type] {
+        
+        if let cache = TypeLoader.sharedInstance.reducedDamageTo[self] {
+            return cache
+        }
+        
         var counters: [Type] = []
         
         for type in TypeLoader.sharedInstance.typeData.keys {
@@ -96,6 +118,7 @@ public enum Type: String, CustomStringConvertible {
             }
         }
         
+        TypeLoader.sharedInstance.reducedDamageTo[self] = counters
         return counters
     }
     
