@@ -7,19 +7,58 @@
 //
 
 import Foundation
+import SwiftyJSON
 
-struct Pokemon {
+public class Pokemon: NSObject {
     let id : Int
     let name: String
-    let types: [Type]
-    let quickAttacks: [Attack]
-    let specialAttacks: [Attack]
+    var types: Set<Type> = []
+    var quickAttacks: [Attack] = []
+    var specialAttacks: [Attack] = []
+    let maxCP: Int
     
-    init(_ dictionary: Dictionary<String, AnyObject>) {
-        id = 3
-        name = "HEllo"
-        types = []
-        quickAttacks = []
-        specialAttacks = []
+    var attacks: [Attack] {
+        get {
+            return quickAttacks + specialAttacks
+        }
+    }
+    
+    var attackTypes: Set<Type> {
+        get {
+            return Set(attacks.map({
+                $0.type
+            }))
+        }
+    }
+    
+    init(_ dictionary: NSDictionary) {
+        
+        let json = JSON(dictionary)
+        
+        id = json["id"].intValue
+        name = json["name"].stringValue
+        maxCP = json["maxCP"].intValue
+        
+        for typeName in json["types"].arrayValue {
+            try! types.insert(Type(name: typeName.stringValue))
+        }
+        
+        for attackName in json["quickAttacks"].arrayValue {
+            let attack = AttackManager.sharedInstance.attacksByName[attackName.stringValue]!
+            quickAttacks.append(attack)
+        }
+        
+        for attackName in json["specialAttacks"].arrayValue {
+            let attack = AttackManager.sharedInstance.attacksByName[attackName.stringValue]!
+            specialAttacks.append(attack)
+        }
+    }
+    
+    public override var description: String {
+        return "\(id): \(name)\nTypes: \(types)\n"
+    }
+    
+    public override var hash: Int {
+        return id
     }
 }

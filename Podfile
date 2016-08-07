@@ -7,4 +7,5 @@ target 'PokeBattle Guide' do
 
   # Pods for PokeBattle Guide
   pod 'Firebase/Core'
+  pod 'SwiftyJSON'
 end
