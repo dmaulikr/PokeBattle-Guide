@@ -20,6 +20,7 @@ class PokemonDetailsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.title = selectedPokemon.name
         self.automaticallyAdjustsScrollViewInsets = false
         imageView.image = selectedPokemon.image
         
